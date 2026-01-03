@@ -20,19 +20,25 @@ const generateTokens = (res, userId, role) => {
     { expiresIn: "7d" } // 7 days
   );
 
+  // Determine environment
+  const isProduction = process.env.NODE_ENV === "production";
+
+  // Common cookie options
+  const cookieOptions = {
+    httpOnly: true,
+    secure: isProduction, // Secure is REQUIRED for SameSite=None
+    sameSite: isProduction ? "none" : "strict", // Cross-site requires None
+  };
+
   // Set Access Token Cookie
   res.cookie("accessToken", accessToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
+    ...cookieOptions,
     maxAge: 15 * 60 * 1000, // 15 minutes
   });
 
   // Set Refresh Token Cookie
   res.cookie("refreshToken", refreshToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
+    ...cookieOptions,
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   });
 

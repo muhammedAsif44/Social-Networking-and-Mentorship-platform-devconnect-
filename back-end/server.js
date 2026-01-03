@@ -32,7 +32,7 @@ const app = express();
 const server = http.createServer(app); // Required for Socket.IO
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://yourdomain.com", // REPLACE THIS with actual domain after buying one
+  "https://dev-connect-v1-olive.vercel.app",
   process.env.CLIENT_URL,
 ].filter(Boolean);
 
