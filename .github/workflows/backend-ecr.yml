@@ -20,7 +20,7 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::YOUR_ACCOUNT_ID:role/GitHubActions-ECR
+          role-to-assume: arn:aws:iam::215572308714:role/GitHubActions-ECR
           aws-region: ap-southeast-2
 
       - name: Login to Amazon ECR
@@ -29,5 +29,5 @@ jobs:
       - name: Build and push backend image
         run: |
           docker build -t devconnect-backend ./back-end
-          docker tag devconnect-backend:latest YOUR_ACCOUNT_ID.dkr.ecr.ap-southeast-2.amazonaws.com/devconnect-backend:latest
+          docker tag devconnect-backend:latest 215572308714.dkr.ecr.ap-southeast-2.amazonaws.com/devconnect-backend
           docker push YOUR_ACCOUNT_ID.dkr.ecr.ap-southeast-2.amazonaws.com/devconnect-backend:latest
