@@ -46,15 +46,19 @@ api.interceptors.response.use(
   // Error response - handle token expiration
   async (error) => {
     const originalRequest = error.config;
-    const isTokenExpired =
-      error.response?.status === 401 &&
-      error.response?.data?.tokenExpired;
+    // Safely check for response status
+    if (error.response?.status === 401 && !originalRequest._retry) {
 
-    // If token expired and we haven't retried yet
-    if (isTokenExpired && !originalRequest._retry) {
+      // 1. NEVER refresh if the failed request was login, refresh-token, or logout
+      //    (Prevents infinite loops on these endpoints)
+      const url = originalRequest.url || "";
+      if (url.includes("/auth/login") || url.includes("/auth/refresh-token") || url.includes("/auth/logout")) {
+        return Promise.reject(error);
+      }
+
       originalRequest._retry = true;
 
-      // If already refreshing, queue this request
+      // 2. If already refreshing, queue this request
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           subscribeTokenRefresh(() => {
@@ -65,27 +69,20 @@ api.interceptors.response.use(
         });
       }
 
-      // Start refresh process
+      // 3. Start refresh process
       isRefreshing = true;
 
       try {
-        // Call refresh endpoint
         await api.post("/auth/refresh-token");
-
-        // Success - notify all queued requests
         isRefreshing = false;
         onTokenRefreshed();
-
-        // Retry original request
         return api(originalRequest);
-
       } catch (refreshError) {
-        // Refresh failed
         isRefreshing = false;
         onRefreshError();
 
-        // If refresh token expired, redirect to login
-        if (refreshError.response?.data?.requireLogin) {
+        // 4. Only redirect to login if we are not already there
+        if (window.location.pathname !== "/login") {
           window.location.href = "/login";
         }
 
@@ -93,7 +90,6 @@ api.interceptors.response.use(
       }
     }
 
-    // Not a token expiration error - reject normally
     return Promise.reject(error);
   }
 );
