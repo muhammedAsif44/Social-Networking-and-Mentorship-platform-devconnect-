@@ -4,7 +4,7 @@ import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import Button from "../components/Button";
 import InputField from "../components/InputField";
-import useAuthStore  from "../ZustandStore/useAuthStore";
+import useAuthStore from "../ZustandStore/useAuthStore";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
@@ -38,14 +38,22 @@ export default function Login() {
   const handleSubmit = async (values, { setSubmitting, setErrors }) => {
     try {
       const user = await login(values);
-      toast.success("Login successful!", { duration: 3000 });
-      redirectByRole(user.role);
+      // Login successful, toast already handled in store (or here)
+      // Immediate redirect based on API response
+      if (user && user.role) {
+        redirectByRole(user.role);
+      } else {
+        // Fallback if role is missing
+        navigate("/dashboard");
+      }
     } catch (error) {
-      console.error(error);
-      toast.error(error.response?.data?.message || "Invalid credentials");
-      setErrors({
-        email: error.response?.data?.message || "Invalid credentials",
-      });
+      console.error("Login Error:", error);
+      // Toast handled in store, but we can set form errors
+      if (error.response?.data?.message) {
+        setErrors({
+          email: error.response.data.message,
+        });
+      }
     } finally {
       setSubmitting(false);
     }

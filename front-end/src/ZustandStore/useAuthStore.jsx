@@ -16,7 +16,7 @@ const useAuthStore = create((set, get) => ({
   error: null,
   pollingRef: null,
   initialized: false,
-  isPremium: false,  
+  isPremium: false,
 
   fetchUserProfile: async (force = false) => {
     const { initialized } = get();
@@ -123,8 +123,8 @@ const useAuthStore = create((set, get) => ({
       } else {
         toast.success("Login successful!", { duration: 3000 });
       }
-      
-      await get().fetchUserProfile(true); // force refresh to sync cookie session
+
+      // await get().fetchUserProfile(true); // removed to prevent blocking redirect
       return user;
     } catch (err) {
       const msg = err.response?.data?.message || "Login failed";
